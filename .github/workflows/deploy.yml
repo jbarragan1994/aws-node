@@ -1,0 +1,42 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # Puedes cambiar esta rama según el flujo que desees
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.11.0'  # Cambia a la versión que uses
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        # Instalar dependencias en EC2 y desplegar
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+
+        # Copiar archivos del repositorio a EC2
+        scp -i private_key.pem -o StrictHostKeyChecking=no -r . $USER@$HOST:/home/$USER/app
+
+        # Conectarse al servidor EC2 y ejecutar comandos para desplegar
+        ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+          cd /home/$USER/app
+          npm install
+          pm2 restart all || pm2 start app.js  # Usa el manejador de procesos que prefieras
+        EOF
