@@ -26,7 +26,7 @@ jobs:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
-      run: |       
+      run: |
         # Instalar dependencias en EC2 y desplegar
         echo "$PRIVATE_KEY" > node.pem
         chmod 600 node.pem
@@ -35,7 +35,7 @@ jobs:
         scp -i node.pem -o StrictHostKeyChecking=no -r $(pwd)/* $USER@$HOST:/home/$USER/projects/aws-node
 
         # Conectarse al servidor EC2 y ejecutar comandos para desplegar
-        ssh -i node.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+        ssh -i node.pem -o StrictHostKeyChecking=no $USER@$HOST << EOF
           # Instalar PM2 si no está instalado
           if ! command -v pm2 &> /dev/null
           then
@@ -51,5 +51,6 @@ jobs:
           npm install
 
           # Iniciar o reiniciar la aplicación con PM2
-          pm2 restart all || pm2 start app.js  # Ajusta a tu archivo principal de Node.js
-        EOF 
+          pm2 restart all || pm2 start server.js  # Ajusta a tu archivo principal (por ejemplo, 'server.js')
+    EOF
+ 
