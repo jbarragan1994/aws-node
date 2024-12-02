@@ -26,17 +26,24 @@ jobs:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
-      run: |
+      run: |        
         # Instalar dependencias en EC2 y desplegar
         echo "$PRIVATE_KEY" > node.pem
         chmod 600 node.pem
 
+        # Imprimir el directorio actual y los archivos
+        echo "Current directory:"
+        pwd
+        echo "Listing files in current directory:"
+        ls -la
+
         # Copiar archivos del repositorio a EC2
-        scp -i node.pem -o StrictHostKeyChecking=no -r . $USER@$HOST:/home/$USER/app
+        scp -i node.pem -o StrictHostKeyChecking=no -r $(pwd)/* $USER@$HOST:/home/$USER/projects/aws-node
 
         # Conectarse al servidor EC2 y ejecutar comandos para desplegar
         ssh -i node.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-          cd /home/$USER/app
+          mkdir -p /home/$USER/projects/aws-node  # Crea el directorio si no existe
+          cd /home/$USER/projects/aws-node
           npm install
           pm2 restart all || pm2 start app.js  # Usa el manejador de procesos que prefieras
         EOF
