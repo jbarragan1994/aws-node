@@ -52,5 +52,5 @@ jobs:
 
           # Iniciar o reiniciar la aplicación con PM2
           pm2 restart all || pm2 start server.js  # Ajusta a tu archivo principal (por ejemplo, 'server.js')
-    EOF
+      EOF
  
