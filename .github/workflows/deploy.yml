@@ -28,14 +28,14 @@ jobs:
         USER: ${{ secrets.EC2_USER }}
       run: |
         # Instalar dependencias en EC2 y desplegar
-        echo "$PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
+        echo "$PRIVATE_KEY" > node.pem
+        chmod 600 node.pem
 
         # Copiar archivos del repositorio a EC2
-        scp -i private_key.pem -o StrictHostKeyChecking=no -r . $USER@$HOST:/home/$USER/app
+        scp -i node.pem -o StrictHostKeyChecking=no -r . $USER@$HOST:/home/$USER/app
 
         # Conectarse al servidor EC2 y ejecutar comandos para desplegar
-        ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+        ssh -i node.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
           cd /home/$USER/app
           npm install
           pm2 restart all || pm2 start app.js  # Usa el manejador de procesos que prefieras
